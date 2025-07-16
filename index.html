@@ -352,8 +352,6 @@
                     </div>
                     <!-- Right Column: Contact Form -->
                     <div class="reveal">
-                        <!-- To make this form work, create a free account at formspree.io -->
-                        <!-- and replace the action URL with your own form endpoint. -->
                         <form action="https://formspree.io/f/movlqnyn" method="POST" class="space-y-4">
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-400 mb-1">Your Name</label>
@@ -445,7 +443,6 @@
             }
 
             async function generateProjectIdea() {
-                // 1. Get user input and existing skills
                 const userKeywords = keywordsInput.value;
                 if (!userKeywords) {
                     ideaOutput.innerHTML = `<p class="text-yellow-400 text-center">Please enter some keywords to generate an idea.</p>`;
@@ -455,75 +452,54 @@
                 const skillSpans = document.querySelectorAll('#skill-cards-container .skill-card span');
                 const mySkills = Array.from(skillSpans).map(span => span.textContent).join(', ');
 
-                // 2. Show loading state
                 ideaOutput.innerHTML = '';
                 loadingSpinner.classList.remove('hidden');
                 generateBtn.disabled = true;
                 generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
-                // 3. Construct the prompt for Gemini API
                 const prompt = `
                     You are an expert project manager and tech lead. I am a university student building my software engineering portfolio.
                     My skills include: ${mySkills}.
                     I want to build a project using these technologies or concepts: ${userKeywords}.
-
-                    Generate a unique and impressive project idea for my portfolio. The idea should be challenging but achievable for a student.
-
-                    Respond ONLY with a valid JSON object in the following format, with no other text, explanations, or markdown formatting.
+                    Generate a unique and impressive project idea.
+                    Respond ONLY with a valid JSON object in the following format, with no other text or markdown:
                     {
-                      "projectName": "A creative and descriptive project title",
-                      "description": "A one-paragraph summary of the project and its purpose.",
-                      "keyFeatures": [
-                        "A list of 3-5 key features.",
-                        "Each feature should be a string in the array."
-                      ],
-                      "techStack": [
-                        "A list of recommended technologies based on my skills and the project requirements."
-                      ]
+                      "projectName": "A creative project title",
+                      "description": "A one-paragraph summary.",
+                      "keyFeatures": ["A list of 3-5 key features."],
+                      "techStack": ["A list of recommended technologies."]
                     }
                 `;
                 
-                // 4. Call the Gemini API
                 try {
-                    let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
-                    const payload = { 
-                        contents: chatHistory,
-                        generationConfig: {
-                            responseMimeType: "application/json",
-                        }
-                    };
-                    const apiKey = ""; // API key will be injected by the environment
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-                    
-                    const response = await fetch(apiUrl, {
+                    // This now calls our own serverless function endpoint
+                    const response = await fetch('/api/generate', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ prompt: prompt }),
                     });
 
                     if (!response.ok) {
-                        throw new Error(`API Error: ${response.statusText}`);
+                        const err = await response.json();
+                        throw new Error(err.error || 'API Error');
                     }
 
                     const result = await response.json();
                     
-                    if (result.candidates && result.candidates.length > 0 &&
-                        result.candidates[0].content && result.candidates[0].content.parts &&
-                        result.candidates[0].content.parts.length > 0) {
-                        
+                    if (result.candidates && result.candidates.length > 0) {
                         const jsonText = result.candidates[0].content.parts[0].text;
                         const idea = JSON.parse(jsonText);
                         displayIdea(idea);
-
                     } else {
-                        throw new Error("Received an invalid response from the API.");
+                        throw new Error("Received an invalid response structure from the API.");
                     }
 
                 } catch (error) {
-                    console.error("Error calling Gemini API:", error);
-                    ideaOutput.innerHTML = `<p class="text-red-400 text-center">Sorry, something went wrong. Please try again later. (${error.message})</p>`;
+                    console.error("Error calling project idea generator:", error);
+                    ideaOutput.innerHTML = `<p class="text-red-400 text-center">Sorry, something went wrong. Please try again. (${error.message})</p>`;
                 } finally {
-                    // 5. Hide loading state
                     loadingSpinner.classList.add('hidden');
                     generateBtn.disabled = false;
                     generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
