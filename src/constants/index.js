@@ -2,6 +2,48 @@
 export const myProjects = [
   {
     id: 1,
+    title: "LegalGPT (NyayaSahay) - Indian Law AI Assistant",
+    description:
+      "A RAG-powered legal chatbot that answers questions about Indian law with grounded, source-backed responses, available on web and mobile.",
+    subDescription: [
+      "Built a Retrieval-Augmented Generation pipeline with LangChain, sentence-transformer embeddings, and FAISS / pgvector search over Indian legal documents.",
+      "Developed a FastAPI backend with JWT auth, conversation memory, document upload (PDF/DOCX), and an admin dashboard.",
+      "Created a React web frontend and an Expo (React Native) mobile app sharing the same API.",
+      "Shipped with PostgreSQL + Alembic migrations, Redis caching, Docker Compose, and GitHub Actions CI/CD.",
+    ],
+    href: "https://github.com/asishadimulapu/LegalGpt",
+    logo: "",
+    image: "",
+    tags: [
+      { id: 1, name: "FastAPI" },
+      { id: 2, name: "LangChain" },
+      { id: 3, name: "React" },
+      { id: 4, name: "PostgreSQL" },
+    ],
+  },
+  {
+    id: 2,
+    title: "Device Battery Monitor",
+    description:
+      "A lightweight Windows app that shows the battery level of wireless mice and headphones right on the taskbar, just like the laptop battery.",
+    subDescription: [
+      "Reads Bluetooth battery levels for mice, keyboards, and headphones of any brand through Windows' standard APIs.",
+      "Implemented a custom read-only protocol driver for 2.4 GHz receiver mice, including charging and sleep detection.",
+      "Live taskbar overlay that refreshes on device connect/disconnect, turns red below 20%, and adapts to crowded taskbars.",
+      "Built with the C# compiler bundled in Windows (.NET Framework) - no downloads needed - plus unit tests and PowerShell install scripts.",
+    ],
+    href: "https://github.com/asishadimulapu/device-battery-monitor",
+    logo: "",
+    image: "",
+    tags: [
+      { id: 1, name: "C#" },
+      { id: 2, name: ".NET" },
+      { id: 3, name: "Windows" },
+      { id: 4, name: "PowerShell" },
+    ],
+  },
+  {
+    id: 3,
     title: "Voice Virtual Assistant with ElevenLabs",
     description:
       "An AI-powered voice assistant built with Python and ElevenLabs Conversational AI, enabling natural voice interactions with real-time speech recognition and synthesis.",
@@ -21,7 +63,7 @@ export const myProjects = [
     ],
   },
   {
-    id: 2,
+    id: 4,
     title: "Universal SQL AI Engine",
     description:
       "Production-ready AI-powered SQL query generator with dynamic schema introspection. Transform natural language questions into safe, optimized SQL queries.",
@@ -42,7 +84,7 @@ export const myProjects = [
     ],
   },
   {
-    id: 3,
+    id: 5,
     title: "AI Agent-Based DeepFake Detection",
     description:
       "Multi-agent forensic system for detecting deepfakes and manipulated images using EfficientNetV2-S deep learning with 97% validation accuracy.",

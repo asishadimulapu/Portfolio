@@ -3,7 +3,11 @@ import Alert from "../components/Alert";
 import { Particles } from "../components/Particles";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 
-const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
+// Free email delivery via FormSubmit (https://formsubmit.co) — no API key or signup.
+// The first message sends an activation email to this address; click the link once
+// and every later message lands in this inbox.
+const CONTACT_EMAIL =
+  import.meta.env.VITE_CONTACT_EMAIL || "asishdandy87@gmail.com";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -35,18 +39,29 @@ const Contact = () => {
     setIsLoading(true);
 
     try {
-      const form = new FormData(e.target);
-      form.append("access_key", WEB3FORMS_ACCESS_KEY);
-      form.append("subject", `New contact from ${formData.name}`);
-
-      const response = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        body: form,
-      });
+      const response = await fetch(
+        `https://formsubmit.co/ajax/${CONTACT_EMAIL}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            message: formData.message,
+            _replyto: formData.email,
+            _subject: `New portfolio message from ${formData.name}`,
+            _template: "table",
+            _captcha: "false",
+          }),
+        }
+      );
 
       const result = await response.json();
 
-      if (result.success) {
+      if (response.ok && String(result.success) === "true") {
         setFormData({ name: "", email: "", message: "" });
         showAlertMessage("success", "Your message has been sent!");
       } else {
@@ -54,7 +69,7 @@ const Contact = () => {
       }
     } catch (error) {
       console.error(error);
-      showAlertMessage("danger", "Something went wrong!");
+      showAlertMessage("danger", "Message failed to send. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +115,7 @@ const Contact = () => {
           </div>
 
           <div className="mb-5">
-            <label htmlFor="name" className="field-label">
+            <label htmlFor="email" className="field-label">
               Email
             </label>
             <input
@@ -109,7 +124,7 @@ const Contact = () => {
               type="email"
               className="field-input field-input-focus"
               placeholder="Violet@gmail.com"
-              autoComplete="name"
+              autoComplete="email"
               value={formData.email}
               onChange={handleChange}
               required
@@ -117,17 +132,15 @@ const Contact = () => {
           </div>
 
           <div className="mb-5">
-            <label htmlFor="name" className="field-label">
+            <label htmlFor="message" className="field-label">
               Message
             </label>
             <textarea
               id="message"
               name="message"
-              type="message"
               rows={4}
               className="field-input field-input-focus"
               placeholder="Share your thoughts"
-              autoComplete="name"
               value={formData.message}
               onChange={handleChange}
               required
@@ -135,6 +148,7 @@ const Contact = () => {
           </div>
           <button
             type="submit"
+            disabled={isLoading}
             className="w-full px-1 py-3 text-center rounded-md cursor-pointer bg-radial from-lavender hover-animation"
           >
             {!isLoading ? "send" : "Sending..."}
