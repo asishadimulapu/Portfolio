@@ -3,11 +3,10 @@ import Alert from "../components/Alert";
 import { Particles } from "../components/Particles";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 
-// Free email delivery via FormSubmit (https://formsubmit.co) — no API key or signup.
-// The first message sends an activation email to this address; click the link once
-// and every later message lands in this inbox.
-const CONTACT_EMAIL =
-  import.meta.env.VITE_CONTACT_EMAIL || "asishdandy87@gmail.com";
+// Free email delivery via Web3Forms (https://web3forms.com).
+// Messages go to the email that created the access key.
+// Set VITE_WEB3FORMS_ACCESS_KEY in Vercel -> Project -> Settings -> Environment Variables.
+const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -39,29 +38,29 @@ const Contact = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `https://formsubmit.co/ajax/${CONTACT_EMAIL}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            message: formData.message,
-            _replyto: formData.email,
-            _subject: `New portfolio message from ${formData.name}`,
-            _template: "table",
-            _captcha: "false",
-          }),
-        }
-      );
+      if (!WEB3FORMS_ACCESS_KEY) {
+        throw new Error("VITE_WEB3FORMS_ACCESS_KEY is not set");
+      }
+
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+          subject: `New portfolio message from ${formData.name}`,
+          from_name: "Portfolio Contact Form",
+        }),
+      });
 
       const result = await response.json();
 
-      if (response.ok && String(result.success) === "true") {
+      if (result.success) {
         setFormData({ name: "", email: "", message: "" });
         showAlertMessage("success", "Your message has been sent!");
       } else {
